@@ -29,7 +29,7 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 1100px; }
+    .block-container { padding-top: 0.5rem; padding-bottom: 2rem; max-width: 1100px; }
     .app-title { font-size: 22px; font-weight: 700; color: #14273b; margin-bottom: 4px; }
     .app-subtitle { font-size: 13px; color: #6b7a8d; margin-bottom: 24px; }
     .section-heading { font-size: 17px; font-weight: 600; color: #14273b; margin-top: 28px; margin-bottom: 12px; border-bottom: 1px solid #e3e9f0; padding-bottom: 6px; }
@@ -71,12 +71,15 @@ try:
 except Exception as e:
     artifacts_loaded = False
     load_error = str(e)
+    import traceback
+    traceback.print_exc()
 
 st.markdown('<div class="app-title">Bank Marketing Classification</div>', unsafe_allow_html=True)
 st.markdown('<div class="app-subtitle">Compare five trained models on uploaded test data. Metrics are computed from saved pipelines; no retraining occurs.</div>', unsafe_allow_html=True)
 
 if not artifacts_loaded:
-    st.error("Model artifacts not found. Ensure the model/ folder with saved .joblib pipeline files is present.")
+    st.error("Model artifacts not found. Error: " + str(load_error))
+    st.info("Debug: Check Streamlit Cloud logs for the full traceback.")
     st.stop()
 
 st.sidebar.markdown("### Controls")
