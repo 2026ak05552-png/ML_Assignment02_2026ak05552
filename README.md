@@ -7,14 +7,14 @@ Predict whether a bank customer will subscribe to a term deposit (binary classif
 - **Source**: UCI Machine Learning Repository - Bank Marketing Data Set
 - **File**: `bank-additional-full.csv`
 - **Task**: Binary classification (term deposit subscription: yes/no)
-- **Instances**: 41,188
-- **Features**: 19 input features after removing `duration` (to avoid target leakage)
+- **Instances**: 41,188 (minimum 500 required)
+- **Features**: 19 input features after removing `duration` (to avoid target leakage; minimum 12 required)
 - **Target column**: `y` (yes = 1, no = 0)
-- **Class distribution**: Imbalanced, with substantially more `no` responses than `yes` responses
+- **Class distribution**: Imbalanced, with 36,548 negative (`no`) responses and 4,640 positive (`yes`) responses
 - **Note**: The `duration` feature was excluded because call duration is only known after the marketing call and would introduce target leakage in a real-world prediction scenario.
 
 ## Github Repository Link
-https://github.com/<your-username>/ML_Assignment02_2026ak05552
+https://github.com/2026ak05552-png/ML_Assignment02_2026ak05552
 
 ## Models used
 Five classification models were implemented on the same dataset using identical train/test splits and preprocessing pipelines:
@@ -23,34 +23,33 @@ Five classification models were implemented on the same dataset using identical 
 2. Decision Tree Classifier
 3. K-Nearest Neighbors Classifier
 4. Naive Bayes Classifier (Gaussian)
-5. Support Vector Machine
+5. Support Vector Machine (LinearSVC)
 
 Each model was wrapped in a scikit-learn Pipeline combining `StandardScaler` for numeric features and `OneHotEncoder` for categorical features. All six evaluation metrics were computed on the same held-out test set.
 
 ### Comparison Table
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
 |---------------|----------|-----|-----------|--------|----|-----|
-| Logistic Regression | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
-| Decision Tree | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
-| KNN | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
-| Naive Bayes | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
-| Support Vector Machine | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
-
-*Replace the placeholder values above with the actual metrics printed by `train_models.py` and saved in `model/metrics_comparison.csv`.*
+| Logistic Regression | 0.9009 | 0.8008 | 0.6905 | 0.2188 | 0.3322 | 0.3516 |
+| Decision Tree | 0.8418 | 0.6258 | 0.3131 | 0.3384 | 0.3252 | 0.2360 |
+| KNN | 0.8972 | 0.7444 | 0.5839 | 0.3039 | 0.3997 | 0.3719 |
+| Naive Bayes | 0.8049 | 0.7755 | 0.3172 | 0.6347 | 0.4230 | 0.3490 |
+| Support Vector Machine | 0.9014 | 0.7979 | 0.7164 | 0.2069 | 0.3211 | 0.3502 |
 
 ### Observations on model performance
 | ML Model Name | Observation about model performance |
 |---------------|-------------------------------------|
-| Logistic Regression | Linear model; performs well when classes are linearly separable but may underfit complex non-linear patterns. |
-| Decision Tree | Captures non-linear relationships and interactions; prone to overfitting on imbalanced data without depth limits. |
-| KNN | Distance-based; sensitive to feature scaling and class imbalance; computationally expensive at prediction time. |
-| Naive Bayes | Fast and works well with high-dimensional data; assumes feature independence which may not hold here. |
-| Support Vector Machine | Effective in high-dimensional spaces; sensitive to class imbalance and kernel choice; slower on large datasets. |
+| Logistic Regression | Delivers high accuracy (0.9009) and strong precision (0.6905) but low recall (0.2188), indicating it is conservative in predicting positive cases. This is expected given the class imbalance (mostly `no` responses). |
+| Decision Tree | Shows moderate accuracy (0.8418) but the lowest AUC (0.6258) and MCC (0.2360) among all models. Captures non-linear patterns but is prone to overfitting on this imbalanced dataset without depth constraints. |
+| KNN | Achieves the best balance with the highest MCC (0.3719) and strong F1 (0.3997). Distance-based performance benefits from standard scaling of numeric features, but it is computationally expensive at prediction time on large datasets. |
+| Naive Bayes | Posts the highest recall (0.6347), meaning it identifies most positive cases, though at the cost of lower precision (0.3172). Fast training but assumes feature independence, which may not fully hold here. |
+| Support Vector Machine | Records the highest accuracy (0.9014) and precision (0.7164) but very low recall (0.2069), making it overly conservative on the minority class. Effective in high-dimensional spaces but sensitive to class imbalance. |
 
-**Overall Winner for your dataset:** To be determined by the highest MCC score from `model/metrics_comparison.csv`. MCC and F1 are prioritized over accuracy because the dataset is imbalanced.
+**Overall Winner for this dataset: KNN** — selected based on the highest Matthews Correlation Coefficient (MCC = 0.3719), which is the most reliable metric for imbalanced classification. MCC and F1 are prioritized over accuracy because the dataset is heavily skewed toward `no` responses.
 
 ## Streamlit App
 The deployed Streamlit application allows users to:
+
 1. Upload a test CSV file containing input features and the target column.
 2. Select one of the five trained models from a dropdown.
 3. View all six evaluation metrics (Accuracy, AUC, Precision, Recall, F1, MCC).
@@ -61,8 +60,9 @@ The app loads saved pipeline files (`.joblib`) and does **not** retrain any mode
 
 ## Files in this repository
 - `train_models.py` — Script to train all five models and generate `test_data.csv` and saved pipelines.
+- `complete_training.py` — Helper script to finalize metrics and generate `test_data.csv`.
 - `app.py` — Streamlit web application.
 - `requirements.txt` — Python dependencies.
 - `test_data.csv` — Held-out test data with target column (generated by `train_models.py`).
-- `model/` — Saved trained pipelines for all five classifiers plus `metrics_comparison.csv`.
+- `model/` — Saved trained pipelines for all five classifiers (`.joblib`) plus `metrics_comparison.csv`.
 - `data/` — Original dataset (`bank-additional-full.csv`).
